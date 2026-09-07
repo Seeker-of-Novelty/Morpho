@@ -141,3 +141,7 @@ recompressed copy is discarded and the original is left untouched.
 The final PDF is assembled by `qpdf` selecting exactly the pages you arranged.
 Image pages are turned into single-page PDFs first (via Pillow, honouring EXIF
 rotation)
+
+#### Note:
+
+Made with Claude Fable 5.1
