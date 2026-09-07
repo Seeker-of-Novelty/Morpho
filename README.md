@@ -104,17 +104,6 @@ and (optionally) `~/.config/morpho/`.
 Codec lists are filtered at startup by what **your** ffmpeg build actually
 supports (`ffmpeg -encoders`), so you can't pick an encoder you don't have.
 
-### "Without breaking the file"
-
-Every document conversion is verified before Morpho calls it done. LibreOffice
-exits successfully even when it fails, and it will happily open a corrupt
-`.pptx` as plain text and "convert" that — so Morpho checks that LibreOffice
-reported opening the file as the right kind of document (Impress for slides,
-Calc for sheets, Writer for text), that no error was printed, and that a
-non-empty output exists. A damaged file is marked *Failed* with the reason
-instead of producing a garbage PDF. Outputs are written to a temp folder and
-moved into place only once they pass.
-
 ### Targeting a file size (and shrinking PDFs)
 
 Tick **Limit output size** and pick a target in MB. Morpho then aims for that
@@ -151,53 +140,4 @@ recompressed copy is discarded and the original is left untouched.
 
 The final PDF is assembled by `qpdf` selecting exactly the pages you arranged.
 Image pages are turned into single-page PDFs first (via Pillow, honouring EXIF
-rotation).
-
-## Windows
-
-Needs Python 3.10+ with `pip install PySide6 Pillow`, then `python morpho.py`.
-Install whichever tools you need; the app prompts for a missing one and lets
-you point at any binary under Settings:
-
-```
-winget install Gyan.FFmpeg
-winget install TheDocumentFoundation.LibreOffice
-winget install ArtifexSoftware.GhostScript
-winget install qpdf.qpdf
-winget install calibre.calibre
-```
-
-Archives use the `tar.exe` (bsdtar) that ships with Windows 10 and later.
-Poppler (`pdftoppm`/`pdftotext`) and librsvg have no winget package; without
-them Morpho renders PDF pages with Qt and SVGs with ffmpeg, and PDF → text
-falls back to LibreOffice.
-
-To ship it as a self-contained folder (no Python installed on the target
-machine) — the same way C++ Qt apps ship with their DLLs:
-
-```
-pip install pyinstaller
-pyinstaller --noconsole --name Morpho morpho.py
-```
-
-The result in `dist/Morpho/` runs anywhere. Settings go to
-`%LOCALAPPDATA%\morpho\`. Uninstall = delete the folder, plus the in-app
-uninstall for config removal.
-
-## Notes, honestly stated
-
-- **PDF → DOCX/ODT** uses LibreOffice's PDF importer: text is preserved, but
-  each line tends to become its own text box, so layout may shift. It's
-  offered because it's often useful; the note under the picker says so.
-- **Documents → e-books** and **e-book conversions** need calibre; LibreOffice's
-  own EPUB export is not used because it is unreliable.
-- **SVG → PNG** renders at the SVG's own size unless you pick a *Resolution*
-  under Advanced.
-- **Archives** are repacked by extracting to a temp folder and recreating —
-  paths inside are kept as-is. RAR can be read (via libarchive) but not written.
-- GIF export is intentionally simple (12 fps, scaled). Good for clips; not a
-  palette-optimized GIF workshop.
-- AVIF/WebP/AV1 availability depends on your ffmpeg build; unavailable
-  encoders are hidden or produce a clear error, never a silent failure.
-- One conversion at a time is deliberate: parallel jobs fight over the same
-  CPU and finish slower in wall-clock terms on most machines.
+rotation)
